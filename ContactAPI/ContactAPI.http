@@ -1,6 +1,28 @@
 @ContactAPI_HostAddress = http://localhost:5279
 
-GET {{ContactAPI_HostAddress}}/weatherforecast/
-Accept: application/json
+POST {{ContactAPI_HostAddress}}/api/contact
+Content-Type: application/json
+
+{
+  "firstName": "Fernando",
+  "lastName": "Coveiro",
+  "email": "nandocoveiro@example.com",
+  "phone": "",
+  "country": "United Kingdom",
+  "message": "Hello World",
+  "roles": ["Artist", "Coveiro"]
+}
+
+###
+
+POST {{ContactAPI_HostAddress}}/api/contact
+Content-Type:application/json
+
+{
+  firstName: "",
+  "lastName":"Rodrigo",
+  "email": "no",
+  "message":""
+}
 
 ###
