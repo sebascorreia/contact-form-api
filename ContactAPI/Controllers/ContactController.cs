@@ -2,11 +2,13 @@
 using ContactAPI.Dtos;
 using ContactAPI.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Cors;
 
 namespace ContactAPI.Controllers
 {
     [ApiController]
     [Route("api/contact")]
+    [EnableCors("ContactForm")]
     public class ContactController : ControllerBase
     {
         private readonly ContactDbContext _db;

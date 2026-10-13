@@ -1,5 +1,49 @@
 @ContactAPI_HostAddress = http://localhost:5279
 
+###Allowed origin: should return {"ok": true}
+POST {{ContactAPI_HostAddress}}/api/contact
+Content-Type: application/json
+Origin: http://localhost:3000
+
+{
+  "firstName": "Fernando",
+  "lastName": "Coveiro",
+  "email": "nandocoveiro@example.com",
+  "phone": "",
+  "country": "United Kingdom",
+  "message": "Hello World",
+  "roles": ["Artist", "Coveiro"]
+}
+
+### Missing Required Fields test: should retur 400 with validation errors
+
+POST {{ContactAPI_HostAddress}}/api/contact
+Content-Type: application/json
+Origin: http://localhost:3000
+
+{
+  "firstName": "",
+  "lastName":"Rodrigo",
+  "email": "no",
+  "message":""
+}
+
+### Wrong Origin: should return 403
+POST {{ContactAPI_HostAddress}}/api/contact
+Content-Type: application/json
+Origin: https://bruv.com
+
+{
+  "firstName": "Fernando",
+  "lastName": "Coveiro",
+  "email": "nandocoveiro@example.com",
+  "phone": "",
+  "country": "United Kingdom",
+  "message": "Hello World",
+  "roles": ["Artist", "Coveiro"]
+}
+
+### No Origin: should return 403
 POST {{ContactAPI_HostAddress}}/api/contact
 Content-Type: application/json
 
@@ -13,16 +57,20 @@ Content-Type: application/json
   "roles": ["Artist", "Coveiro"]
 }
 
-###
+### Method Not Allowed: expect 405
+GET {{ContactAPI_HostAddress}}/api/contact
+Origin: http://localhost:3000
 
+### Wrong content type: expect 415
 POST {{ContactAPI_HostAddress}}/api/contact
-Content-Type:application/json
+Content-Type: text/plain
+Origin: http://localhost:3000
 
-{
-  firstName: "",
-  "lastName":"Rodrigo",
-  "email": "no",
-  "message":""
-}
+hello
 
-###
+### Malformed JSON: expect 400
+POST {{ContactAPI_HostAddress}}/api/contact
+Content-Type: application/json
+Origin: http://localhost:3000
+
+{"firstName": "Bino", }
