@@ -3,12 +3,14 @@ using ContactAPI.Dtos;
 using ContactAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ContactAPI.Controllers
 {
     [ApiController]
     [Route("api/contact")]
     [EnableCors("ContactForm")]
+    [EnableRateLimiting("ContactForm")]
     public class ContactController : ControllerBase
     {
         private readonly ContactDbContext _db;

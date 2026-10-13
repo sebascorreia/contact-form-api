@@ -1,5 +1,7 @@
 using ContactAPI.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -10,6 +12,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ContactDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ContactDb")));
 
+//CORS Whitelisting
 var allowedOrigins = builder.Configuration
     .GetSection("AllowedOrigins")
     .Get<string[]>() ?? [];
@@ -21,6 +24,32 @@ builder.Services.AddCors(options =>
     .WithHeaders("Content-Type")
     .SetPreflightMaxAge(TimeSpan.FromMinutes(10)));
 });
+
+//Rate Limiting
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("ContactForm", httpContext =>
+    RateLimitPartition.GetFixedWindowLimiter(
+        partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        factory: _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0
+        }));
+    options.OnRejected = async (context, token) =>
+    {
+        if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+        {
+            context.HttpContext.Response.Headers.RetryAfter =
+            ((int)retryAfter.TotalSeconds).ToString();
+        }
+        await context.HttpContext.Response.WriteAsJsonAsync(
+            new { ok = false, error = "Too many requests" }, token);
+    };
+});
+
 var app = builder.Build();
 
 app.Use(async (context, next) =>
@@ -39,6 +68,8 @@ app.Use(async (context, next) =>
 
 });
 app.UseCors();
+
+app.UseRateLimiter();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
