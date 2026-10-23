@@ -4,6 +4,7 @@ using ContactAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.RateLimiting;
+using ContactAPI.Validation;
 
 namespace ContactAPI.Controllers
 {
@@ -21,14 +22,17 @@ namespace ContactAPI.Controllers
         }
 
         [HttpPost]
+        [Consumes("application/json")]
+        [RequestSizeLimit(32_000)]
         public async Task<IActionResult> Submit(ContactRequest request)
         {
+            string? phone = PhoneHelper.TryNormalise(request.Phone ?? "", out var e164) ? e164 : null; 
             var submission = new ContactSubmission
             {
                 FirstName = request.FirstName.Trim(),
                 LastName = request.LastName.Trim(),
                 Email = request.Email.Trim().ToLowerInvariant(),
-                Phone = string.IsNullOrWhiteSpace(request.Phone) ? null : request.Phone.Trim(),
+                Phone = phone,
                 Country = string.IsNullOrWhiteSpace(request.Country) ? null : request.Country.Trim(),
                 Message = request.Message.Trim(),
                 Roles = request.Roles,

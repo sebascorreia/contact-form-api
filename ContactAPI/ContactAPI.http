@@ -12,7 +12,7 @@ Origin: http://localhost:3000
   "phone": "",
   "country": "United Kingdom",
   "message": "Hello World",
-  "roles": ["Artist", "Coveiro"]
+  "roles": ["Artist"]
 }
 
 ### Missing Required Fields test: should retur 400 with validation errors
@@ -40,7 +40,7 @@ Origin: https://bruv.com
   "phone": "",
   "country": "United Kingdom",
   "message": "Hello World",
-  "roles": ["Artist", "Coveiro"]
+  "roles": ["Artist"]
 }
 
 ### No Origin: should return 403
@@ -74,3 +74,64 @@ Content-Type: application/json
 Origin: http://localhost:3000
 
 {"firstName": "Bino", }
+
+### Bad name: fieldErrors.firstName
+POST {{ContactAPI_HostAddress}}/api/contact
+Content-Type: application/json
+Origin: http://localhost:3000
+{
+  "firstName": "Fernando123",
+  "lastName": "Coveiro",
+  "email": "nandocoveiro@example.com",
+  "message": "Hello World",
+  "roles": ["Artist"]
+}
+
+### Unknown role: fieldErrors.roles
+POST {{ContactAPI_HostAddress}}/api/contact
+Content-Type: application/json
+Origin: http://localhost:3000
+{
+  "firstName": "Fernando",
+  "lastName": "Coveiro",
+  "email": "nandocoveiro@example.com",
+  "message": "Hello World",
+  "roles": ["Coveiro"]
+}
+### No Roles: fieldErrors.roles
+POST {{ContactAPI_HostAddress}}/api/contact
+Content-Type: application/json
+Origin: http://localhost:3000
+{
+  "firstName": "Fernando",
+  "lastName": "Coveiro",
+  "email": "nandocoveiro@example.com",
+  "message": "Hello World",
+  "roles": []
+}
+### No roles but website form: should succeed
+POST {{ContactAPI_HostAddress}}/api/contact
+Content-Type: application/json
+Origin: http://localhost:3000
+{
+  "firstName": "Fernando",
+  "lastName": "Coveiro",
+  "email": "nandocoveiro@example.com",
+  "message": "Hello World",
+  "roles": [],
+  "source": "website-contact"
+}
+
+### Bad phone input: fieldErrors.phone
+POST {{ContactAPI_HostAddress}}/api/contact
+Content-Type: application/json
+Origin: http://localhost:3000
+{
+  "firstName": "Fernando",
+  "lastName": "Coveiro",
+  "email": "nandocoveiro@example.com",
+  "phone": "12345",
+  "country": "United Kingdom",
+  "message": "Hello World",
+  "roles": ["Artist"]
+}

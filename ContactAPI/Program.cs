@@ -2,11 +2,32 @@ using ContactAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
+using ContactAPI.Validation;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var fieldErrors = new Dictionary<string, string>();
+            foreach (var (key, entry) in context.ModelState)
+            {
+                if (entry.Errors.Count == 0) continue;
+                var field = FieldErrors.ToFieldName(key);
+                fieldErrors.TryAdd(field, FieldErrors.MessageFor(field));
+            }
+            return new BadRequestObjectResult(new
+            {
+                ok = false,
+                error = "Invalid request body",
+                fieldErrors
+            });
+        };
+    });
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ContactDbContext>(options =>
@@ -51,6 +72,7 @@ builder.Services.AddRateLimiter(options =>
 });
 
 var app = builder.Build();
+app.UseHttpsRedirection();
 
 app.Use(async (context, next) =>
 {
@@ -77,7 +99,6 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
