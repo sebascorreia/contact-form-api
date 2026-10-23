@@ -39,6 +39,9 @@ namespace ContactAPI.Dtos
         [StringLength(50)]
         public string Source { get; set; } = "afa-contact-form";
 
+        //honeypot trap
+        public string? Honeypot { get; set; }
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if (!AllowedSources.Contains(Source))

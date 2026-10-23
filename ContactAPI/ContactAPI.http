@@ -135,3 +135,18 @@ Origin: http://localhost:3000
   "message": "Hello World",
   "roles": ["Artist"]
 }
+
+### Honeypot filled: should return okay but save nothing
+POST {{ContactAPI_HostAddress}}/api/contact
+Content-Type: application/json
+Origin: http://localhost:3000
+{
+  "firstName": "Bot",
+  "lastName": "Botttt",
+  "email": "nandocoveiro@example.com",
+  "phone": "",
+  "country": "United Kingdom",
+  "message": "Hello World",
+  "roles": ["Artist"],
+  "honeypot":"bla bla bla"
+}
